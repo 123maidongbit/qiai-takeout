@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#fb7185" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>气气外卖 · 情侣道歉店</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { background: #fff1f2; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; color: #1f2937; }
+#app { max-width: 420px; margin: 0 auto; min-height: 100vh; background: #fff1f2; box-shadow: 0 0 24px rgba(244,63,94,.08); position: relative; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea { font-family: inherit; font-size: 14px; }
+.hidden { display: none !important; }
+
+/* ===== 入口 ===== */
+.gate { min-height: 100vh; background: linear-gradient(to bottom, #ffe4e6, #fdf2f8 50%, #fffbeb); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.gate-box { width: 100%; max-width: 340px; }
+.gate-emoji { text-align: center; font-size: 56px; animation: bounce 1.6s infinite; }
+.gate-title { text-align: center; margin-top: 14px; font-size: 28px; font-weight: 900; color: #f43f5e; letter-spacing: 2px; }
+.gate-slogan { text-align: center; font-size: 12px; color: #fb7185; margin-top: 6px; }
+.gate-btns { margin-top: 26px; display: flex; flex-direction: column; gap: 12px; }
+.btn-big { width: 100%; height: 52px; border-radius: 16px; font-size: 16px; font-weight: 600; }
+.btn-her { background: linear-gradient(to right, #fb7185, #ec4899); color: #fff; box-shadow: 0 6px 16px rgba(244,63,94,.3); }
+.btn-his { border: 2px solid #fecdd3; color: #f43f5e; background: rgba(255,255,255,.6); }
+.gate-back { font-size: 13px; color: #fb7185; }
+.gate-input-row { display: flex; gap: 8px; margin-top: 14px; }
+.gate-input { flex: 1; height: 44px; border-radius: 12px; border: 1.5px solid #fecdd3; text-align: center; font-size: 16px; letter-spacing: 6px; outline: none; background: #fff; }
+.gate-input:focus { border-color: #fb7185; box-shadow: 0 0 0 3px rgba(251,113,133,.15); }
+.btn-enter { height: 44px; padding: 0 20px; border-radius: 12px; background: #fb7185; color: #fff; font-weight: 600; }
+.gate-hint { text-align: center; font-size: 11px; color: #fda4af; margin-top: 12px; }
+
+/* ===== 通用 ===== */
+.banner { background: linear-gradient(to right, #fb7185, #ec4899, #fb7185); color: #fff; padding: 30px 20px 44px; border-radius: 0 0 24px 24px; }
+.banner-row { display: flex; align-items: center; gap: 12px; }
+.banner-emoji { font-size: 38px; }
+.banner-name { font-size: 24px; font-weight: 900; }
+.banner-slogan { font-size: 11px; opacity: .9; margin-top: 2px; }
+.announce { margin-top: 14px; background: rgba(255,255,255,.2); border-radius: 12px; padding: 8px 12px; font-size: 11px; line-height: 1.6; }
+.chip { display: inline-block; font-size: 10px; background: #ffe4e6; color: #f43f5e; border-radius: 6px; padding: 1px 6px; margin-left: 4px; }
+.card { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.05); padding: 14px; margin: 0 16px 12px; }
+.float-panel { margin: -22px 16px 0; position: relative; }
+.section-title { font-weight: 700; color: #374151; font-size: 15px; margin: 20px 16px 8px; }
+.menu-item { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.05); padding: 12px; margin: 0 16px 10px; }
+.menu-emoji { font-size: 34px; }
+.menu-info { flex: 1; min-width: 0; }
+.menu-name { font-weight: 600; font-size: 14px; }
+.menu-desc { font-size: 11px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.menu-price { color: #f43f5e; font-weight: 700; font-size: 14px; margin-top: 3px; }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.step-btn { width: 28px; height: 28px; border-radius: 50%; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.step-add { background: #fb7185; color: #fff; }
+.step-minus { border: 1.5px solid #fecdd3; color: #f43f5e; }
+.step-qty { width: 16px; text-align: center; font-weight: 700; color: #f43f5e; font-size: 14px; }
+
+/* 购物车条 */
+.cartbar-wrap { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; z-index: 30; }
+.cartbar { width: 100%; background: #1f2937; color: #fff; border-radius: 999px; box-shadow: 0 8px 24px rgba(0,0,0,.25); padding: 8px 8px 8px 18px; display: flex; align-items: center; justify-content: space-between; }
+.cart-count { background: #f43f5e; border-radius: 999px; min-width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin-right: 8px; padding: 0 6px; }
+.cart-total { font-weight: 800; font-size: 18px; }
+.cart-checkout { background: linear-gradient(to right, #fb7185, #ec4899); border-radius: 999px; padding: 10px 20px; font-weight: 700; font-size: 14px; color: #fff; }
+
+/* 抽屉 */
+.sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 40; }
+.sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 420px; background: #fff; border-radius: 24px 24px 0 0; z-index: 41; max-height: 85vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); animation: slideup .25s ease-out; }
+.sheet-head { padding: 18px 20px 6px; font-size: 17px; font-weight: 700; color: #f43f5e; }
+.sheet-body { padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.line-row { display: flex; justify-content: space-between; font-size: 14px; }
+.red-box { background: #fffbeb; border-radius: 12px; padding: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
+.red-label { color: #d97706; font-weight: 600; }
+.red-presets { display: flex; gap: 8px; }
+.red-preset { flex: 1; border-radius: 8px; padding: 7px 0; font-size: 13px; border: 1px solid #fde68a; color: #d97706; background: #fff; }
+.red-preset.on { background: #ef4444; border-color: #ef4444; color: #fff; font-weight: 700; }
+.red-input { width: 100%; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; outline: none; background: #fff; }
+.area-label { font-size: 11px; color: #9ca3af; margin-bottom: 4px; }
+.textarea { width: 100%; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 10px; resize: none; outline: none; }
+.textarea:focus { border-color: #fb7185; }
+.total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+.total-num { font-size: 24px; font-weight: 900; color: #f43f5e; }
+.btn-submit { width: 100%; height: 46px; border-radius: 12px; background: linear-gradient(to right, #fb7185, #ec4899); color: #fff; font-size: 15px; font-weight: 700; }
+.btn-submit:disabled { opacity: .5; }
+
+/* 骑手动画页 */
+.rider-page { min-height: 100vh; background: linear-gradient(to bottom, #fffbeb, #ffe4e6); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; }
+.rider-emoji { font-size: 72px; animation: ride 1.2s ease-in-out infinite; }
+.rider-title { font-size: 20px; font-weight: 800; color: #f43f5e; }
+.rider-sub { font-size: 13px; color: #fb7185; }
+.btn-ghost { border: 1.5px solid #fecdd3; color: #f43f5e; border-radius: 12px; padding: 10px 22px; font-size: 14px; background: rgba(255,255,255,.7); }
+
+/* 收单台 */
+.owner-head { background: linear-gradient(to right, #ec4899, #fb7185); color: #fff; padding: 30px 20px 38px; border-radius: 0 0 24px 24px; }
+.owner-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.owner-title { font-size: 22px; font-weight: 900; }
+.owner-sub { font-size: 11px; opacity: .9; margin-top: 3px; }
+.owner-num { font-size: 24px; font-weight: 900; text-align: right; }
+.owner-num-label { font-size: 10px; opacity: .9; text-align: right; }
+.pending-tip { margin-top: 12px; background: rgba(255,255,255,.25); border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 600; animation: pulse 1.6s infinite; }
+.filter-row { display: flex; gap: 8px; padding: 14px 16px 0; }
+.filter-btn { flex: 1; border-radius: 999px; padding: 9px 0; font-size: 13px; font-weight: 600; background: #fff; color: #fb7185; }
+.filter-btn.on { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244,63,94,.3); }
+.order-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.05); padding: 14px; margin: 12px 16px 0; display: flex; flex-direction: column; gap: 8px; }
+.order-top { display: flex; justify-content: space-between; align-items: center; }
+.order-time { font-size: 11px; color: #9ca3af; }
+.status { font-size: 11px; border-radius: 6px; padding: 2px 8px; font-weight: 600; }
+.st-pending { background: #fef3c7; color: #d97706; }
+.st-accepted { background: #dcfce7; color: #16a34a; }
+.st-rejected { background: #fee2e2; color: #ef4444; }
+.st-done { background: #f3f4f6; color: #9ca3af; }
+.order-line { display: flex; justify-content: space-between; font-size: 13px; }
+.order-msg { background: #fff1f2; border-radius: 10px; padding: 8px 10px; font-size: 12px; color: #f43f5e; line-height: 1.6; }
+.order-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+.order-total { font-size: 19px; font-weight: 900; color: #f43f5e; }
+.order-actions { display: flex; gap: 8px; }
+.btn-xs { font-size: 12px; border-radius: 999px; padding: 7px 13px; font-weight: 600; }
+.btn-open-red { background: linear-gradient(to right, #ef4444, #f59e0b); color: #fff; }
+.btn-reject { border: 1.5px solid #fecaca; color: #ef4444; }
+.btn-accept { background: #fb7185; color: #fff; }
+.btn-done { border: 1.5px solid #bbf7d0; color: #16a34a; }
+.reject-msg { font-size: 12px; background: #fef2f2; color: #ef4444; border-radius: 8px; padding: 6px 10px; }
+.mine-toggle { width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.05); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.mine-toggle .t { color: #f43f5e; font-weight: 600; }
+.empty { text-align: center; color: #fda4af; padding: 60px 0; font-size: 13px; }
+.empty-e { font-size: 46px; margin-bottom: 10px; }
+
+/* 红包 */
+.env-mask { position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.env-close { position: absolute; top: 18px; right: 20px; color: rgba(255,255,255,.6); font-size: 20px; }
+.env-body { width: 270px; height: 400px; background: linear-gradient(to bottom, #ef4444, #dc2626); border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.4); cursor: pointer; animation: popin .3s ease-out; }
+.env-flap { position: absolute; top: 0; left: 0; right: 0; height: 110px; background: #dc2626; border-radius: 0 0 100% 100%; }
+.env-seal { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); width: 56px; height: 56px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #dc2626; font-weight: 900; font-size: 20px; border: 4px solid #fcd34d; box-shadow: 0 4px 10px rgba(0,0,0,.2); animation: pulse 1.4s infinite; }
+.env-text { position: absolute; bottom: 86px; left: 0; right: 0; text-align: center; color: #fde68a; font-size: 13px; line-height: 1.8; padding: 0 20px; }
+.env-text small { opacity: .8; font-size: 11px; }
+.env-result { width: 270px; background: linear-gradient(to bottom, #ef4444, #d97706); border-radius: 16px; padding: 32px 22px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,.4); animation: popin .35s ease-out; }
+.env-result-label { color: #fde68a; font-size: 13px; }
+.env-amount { font-size: 52px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.3); margin: 8px 0; animation: amountin .6s ease-out; }
+.env-msg { color: rgba(255,255,255,.85); font-size: 12px; line-height: 1.7; }
+.env-note { margin-top: 18px; background: rgba(255,255,255,.2); border-radius: 999px; padding: 8px 0; color: #fff; font-size: 13px; }
+.env-done { margin-top: 12px; color: rgba(255,255,255,.7); font-size: 12px; text-decoration: underline; }
+.coin { position: absolute; animation: coinfall 1.8s ease-in forwards; }
+
+/* 弹窗 */
+.dlg-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.dlg { background: #fff; border-radius: 16px; width: 100%; max-width: 320px; padding: 20px; animation: popin .25s ease-out; }
+.dlg-title { font-size: 16px; font-weight: 700; color: #ef4444; }
+.dlg-desc { font-size: 13px; color: #6b7280; margin: 8px 0 12px; line-height: 1.6; }
+.dlg-btns { display: flex; gap: 10px; margin-top: 14px; }
+.dlg-btn { flex: 1; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.dlg-cancel { border: 1.5px solid #e5e7eb; color: #6b7280; }
+.dlg-ok { background: #ef4444; color: #fff; }
+
+/* toast */
+#toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.toast-item { background: rgba(31,41,55,.92); color: #fff; border-radius: 999px; padding: 9px 18px; font-size: 13px; animation: popin .25s ease-out; }
+.toast-item.ok { background: rgba(22,163,74,.92); }
+
+.role-switch { position: fixed; top: 12px; right: 12px; z-index: 45; background: rgba(255,255,255,.85); backdrop-filter: blur(6px); color: #fb7185; font-size: 11px; border-radius: 999px; padding: 6px 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+@keyframes ride { 0%,100% { transform: translateX(-14px) rotate(-4deg); } 50% { transform: translateX(14px) rotate(4deg); } }
+@keyframes popin { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes slideup { 0% { transform: translate(-50%, 100%); } 100% { transform: translate(-50%, 0); } }
+@keyframes amountin { 0% { transform: scale(.2) rotate(-10deg); opacity: 0; } 60% { transform: scale(1.15) rotate(3deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes coinfall { 0% { top: -8%; opacity: 1; transform: rotate(0); } 100% { top: 108%; opacity: 0; transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// ==================== 配置区（改这里） ====================
+const STORE = {
+  name: '气气外卖',
+  slogan: '本店专治各种生气 · 下单即哄 · 概不退货',
+  announcement: '温馨提示：惹宝贝生气后，请尽快下单，拖延越久，奶茶越贵。',
+  herPassword: '8888',
+  hisPassword: '9999',
+  herName: '宝贝',
+  hisName: '大猪蹄子',
+  titles: [
+    { min: 0, title: '待考察男友' },
+    { min: 100, title: '见习道歉员' },
+    { min: 300, title: '资深哄人大师' },
+    { min: 1000, title: '免死金牌持有者' },
+  ],
+  supabaseUrl: 'https://dnpocfdwuutnilvnseqc.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucG9jZmR3dXV0bmlsdm5zZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NDk3NDIsImV4cCI6MjEwNjMyNTc0Mn0.KaYseQPZFdjohmerKoXBwSUj-Ua45Mrc59bBs1xJciI',
+};
+
+const MENU = [
+  { id: 'milktea1', name: '招牌哄妻奶茶', emoji: '🧋', price: 18, desc: '三分糖去冰，气消一半', tag: '镇店之宝', category: '🧋 奶茶果茶' },
+  { id: 'milktea2', name: '芋泥波波奶茶', emoji: '🥤', price: 22, desc: '波波很乖，不像某人', category: '🧋 奶茶果茶' },
+  { id: 'milktea3', name: '霸气草莓啵啵', emoji: '🍓', price: 26, desc: '草莓很甜，哄哄更好', category: '🧋 奶茶果茶' },
+  { id: 'milktea4', name: '杨枝甘露', emoji: '🥭', price: 25, desc: '芒着道歉，果然有效', category: '🧋 奶茶果茶' },
+  { id: 'coupon1', name: '认真道歉券', emoji: '💌', price: 9.9, desc: '必须当面说满 3 分钟，不许笑场', tag: '入门必备', category: '💌 诚意券' },
+  { id: 'coupon2', name: '洗碗一个月券', emoji: '🍽️', price: 66, desc: '碗我洗，锅我刷，绝不拖延', category: '💌 诚意券' },
+  { id: 'coupon3', name: '随叫随到券 ×10', emoji: '🏃', price: 52, desc: '半夜想吃烧烤也立刻出发', category: '💌 诚意券' },
+  { id: 'coupon4', name: '按摩 30 分钟券', emoji: '💆', price: 38, desc: '手法不好可以重来', category: '💌 诚意券' },
+  { id: 'coupon5', name: '免死金牌', emoji: '🏅', price: 199, desc: '下次犯错直接免吵一次', tag: '镇店之宝', category: '💌 诚意券' },
+  { id: 'gift1', name: '口红一支（自选色号）', emoji: '💄', price: 350, desc: '色号选错需重新下单', category: '🎁 大牌礼物' },
+  { id: 'gift2', name: '鲜花一束', emoji: '💐', price: 128, desc: '附赠当面夸 10 句不重样', category: '🎁 大牌礼物' },
+  { id: 'gift3', name: '盲盒一个', emoji: '🎁', price: 69, desc: '拆到雷款可换一次', category: '🎁 大牌礼物' },
+  { id: 'gift4', name: '火锅一顿', emoji: '🍲', price: 200, desc: '涮好的第一口永远夹给你', tag: '店长推荐', category: '🎁 大牌礼物' },
+  { id: 'redpacket', name: '现金红包', emoji: '🧧', price: 0, desc: '下单时填金额，收到记得去微信领取', tag: '最快消气', category: '💰 现金红包', isRedPacket: true },
+];
+// =========================================================
+
+// ==================== 数据同步层 ====================
+let sb = null;
+if (STORE.supabaseUrl && STORE.supabaseAnonKey) {
+  sb = createClient(STORE.supabaseUrl, STORE.supabaseAnonKey);
+}
+const LS_KEY = 'qiai_orders_v1';
+let orders = [];
+const seenIds = new Set();
+
+async function loadOrders() {
+  if (sb) {
+    const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(200);
+    if (!error && data) {
+      orders = data;
+      sb.channel('orders-live').on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'DELETE') orders = orders.filter((o) => o.id !== payload.old.id);
+        else {
+          const i = orders.findIndex((o) => o.id === payload.new.id);
+          if (i >= 0) orders[i] = payload.new; else orders.unshift(payload.new);
+        }
+        onOrdersChanged();
+      }).subscribe();
+      onOrdersChanged();
+      return;
+    }
+  }
+  orders = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+  onOrdersChanged();
+}
+window.addEventListener('storage', (e) => {
+  if (!sb && e.key === LS_KEY) { orders = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); onOrdersChanged(); }
+});
+
+async function createOrder(order) {
+  if (sb) {
+    const { error } = await sb.from('orders').insert(order);
+    return !error;
+  }
+  orders.push(order);
+  localStorage.setItem(LS_KEY, JSON.stringify(orders));
+  onOrdersChanged();
+  return true;
+}
+
+async function setStatus(id, status, reason = '') {
+  if (sb) {
+    const { error } = await sb.from('orders').update({ status, reject_reason: reason }).eq('id', id);
+    return !error;
+  }
+  const o = orders.find((x) => x.id === id);
+  if (o) { o.status = status; o.reject_reason = reason; localStorage.setItem(LS_KEY, JSON.stringify(orders)); onOrdersChanged(); }
+  return true;
+}
+
+async function removeOrder(id) {
+  if (sb) { const { error } = await sb.from('orders').delete().eq('id', id); return !error; }
+  orders = orders.filter((x) => x.id !== id);
+  localStorage.setItem(LS_KEY, JSON.stringify(orders));
+  onOrdersChanged();
+  return true;
+}
+
+// ==================== 工具 ====================
+const app = document.getElementById('app');
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = (n) => '¥' + Number(n).toFixed(2);
+
+function toast(msg, ok = false) {
+  const t = document.createElement('div');
+  t.className = 'toast-item' + (ok ? ' ok' : '');
+  t.textContent = msg;
+  document.getElementById('toast').appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+
+function chime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.15;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.25, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      osc.connect(g).connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.45);
+    });
+  } catch (e) { /* ignore */ }
+}
+
+// ==================== 状态 ====================
+let role = localStorage.getItem('qiai_role');
+let cart = {};
+let ui = {
+  gateRole: null, gatePwd: '', cartOpen: false, message: '', redAmount: '52',
+  sentAnim: false, showMine: false, filter: 'pending',
+  envelope: null, reject: null, rejectReason: '',
+};
+let dirty = false;
+
+function onOrdersChanged() {
+  orders.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  orders.forEach((o) => {
+    if (!seenIds.has(o.id)) {
+      seenIds.add(o.id);
+      if (role === 'her' && o.status === 'pending' && Date.now() - new Date(o.created_at).getTime() < 60000) chime();
+    }
+  });
+  render();
+}
+
+// ==================== 渲染 ====================
+function render() {
+  dirty = false;
+  if (ui.sentAnim) return renderRider();
+  if (!role) return renderGate();
+  if (role === 'his') return renderHis();
+  renderHer();
+  renderEnvelope();
+  renderRejectDlg();
+}
+
+function renderGate() {
+  if (!ui.gateRole) {
+    app.innerHTML = `<div class="gate"><div class="gate-box">
+      <div class="gate-emoji">🧋</div>
+      <div class="gate-title">${esc(STORE.name)}</div>
+      <div class="gate-slogan">${esc(STORE.slogan)}</div>
+      <div class="gate-btns">
+        <button class="btn-big btn-her" onclick="pickRole('her')">💗 我是${esc(STORE.herName)}（收单）</button>
+        <button class="btn-big btn-his" onclick="pickRole('his')">🙇 我是${esc(STORE.hisName)}（下单道歉）</button>
+      </div>
+    </div></div>`;
+  } else {
+    const isHer = ui.gateRole === 'her';
+    app.innerHTML = `<div class="gate"><div class="gate-box" id="gateBox">
+      <button class="gate-back" onclick="backGate()">← 返回</button>
+      <div class="gate-emoji" style="margin-top:16px">${isHer ? '👑' : '🙇'}</div>
+      <div class="gate-title" style="font-size:20px">${isHer ? esc(STORE.herName) + '专用入口' : esc(STORE.hisName) + '专用入口'}</div>
+      <div class="gate-input-row">
+        <input class="gate-input" type="password" inputmode="numeric" placeholder="输入入口密码" id="pwdInput" value="${esc(ui.gatePwd)}" oninput="ui.gatePwd=this.value" onkeydown="if(event.key==='Enter')tryEnter()" />
+        <button class="btn-enter" onclick="tryEnter()">进入</button>
+      </div>
+      <div class="gate-hint">密码可在文件顶部配置区修改</div>
+    </div></div>`;
+  }
+}
+
+function cartLines() {
+  return MENU.filter((m) => (cart[m.id] || 0) > 0).map((m) => ({ ...m, qty: cart[m.id] }));
+}
+const hasRed = () => cartLines().some((l) => l.isRedPacket);
+const redVal = () => Math.max(0, parseFloat(ui.redAmount) || 0);
+function cartTotal() {
+  return cartLines().reduce((s, l) => s + (l.isRedPacket ? redVal() : l.price) * l.qty, 0);
+}
+const cartCount = () => cartLines().reduce((s, l) => s + l.qty, 0);
+const activeOrders = () => orders.filter((o) => o.status !== 'done');
+
+function renderHis() {
+  const lines = cartLines();
+  const myOrders = activeOrders();
+  const cats = [...new Set(MENU.map((m) => m.category))];
+  app.innerHTML = `
+  <div class="banner">
+    <div class="banner-row">
+      <div class="banner-emoji">🧋</div>
+      <div><div class="banner-name">${esc(STORE.name)}</div><div class="banner-slogan">${esc(STORE.slogan)}</div></div>
+    </div>
+    <div class="announce">📢 ${esc(STORE.announcement)}</div>
+  </div>
+  ${myOrders.length ? `
+  <div class="float-panel">
+    <button class="mine-toggle" onclick="ui.showMine=!ui.showMine;render()">
+      <span class="t">🔔 有 ${myOrders.length} 笔订单进行中${myOrders.some((o) => o.status === 'rejected') ? '（有被打回的！）' : ''}</span>
+      <span style="color:#fda4af">${ui.showMine ? '收起 ▲' : '查看 ▼'}</span>
+    </button>
+    ${ui.showMine ? `<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">${myOrders.map(orderCardMini).join('')}</div>` : ''}
+  </div>` : ''}
+  ${cats.map((cat) => `
+    <div class="section-title">${esc(cat)}</div>
+    ${MENU.filter((m) => m.category === cat).map(menuItemHtml).join('')}
+  `).join('')}
+  ${lines.length ? `
+  <div class="cartbar-wrap"><button class="cartbar" onclick="openCart()">
+    <span style="display:flex;align-items:center"><span class="cart-count">${cartCount()}</span><span class="cart-total">${money(cartTotal())}</span></span>
+    <span class="cart-checkout">去结算</span>
+  </button></div>` : ''}
+  <div id="sheetRoot"></div>`;
+  renderCartSheet();
+}
+
+function menuItemHtml(m) {
+  const qty = cart[m.id] || 0;
+  return `<div class="menu-item">
+    <div class="menu-emoji">${m.emoji}</div>
+    <div class="menu-info">
+      <div class="menu-name">${esc(m.name)}${m.tag ? `<span class="chip">${esc(m.tag)}</span>` : ''}</div>
+      <div class="menu-desc">${esc(m.desc)}</div>
+      <div class="menu-price">${m.isRedPacket ? '金额自定' : money(m.price)}</div>
+    </div>
+    ${qty === 0
+      ? `<button class="step-btn step-add" onclick="addItem('${m.id}')">+</button>`
+      : `<div class="stepper">
+          <button class="step-btn step-minus" onclick="minusItem('${m.id}')">−</button>
+          <span class="step-qty">${qty}</span>
+          <button class="step-btn step-add" onclick="addItem('${m.id}')">+</button>
+        </div>`}
+  </div>`;
+}
+
+function orderCardMini(o) {
+  return `<div class="card" style="margin:0">
+    <div class="order-top"><span style="color:#f43f5e;font-weight:700">${money(o.total)}</span>${statusBadge(o.status)}</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:4px">${o.items.map((i) => `${i.emoji}${esc(i.name)}×${i.qty}`).join('、')}</div>
+    ${o.status === 'rejected' ? `<div class="reject-msg" style="margin-top:6px">💢 打回原因：${esc(o.reject_reason || '没有诚意，重选！')}</div>` : ''}
+    ${o.status === 'accepted' ? `<div style="margin-top:6px;font-size:12px;background:#f0fdf4;color:#16a34a;border-radius:8px;padding:6px 10px">💗 已被接单，快去兑现承诺！${o.redpacket_amount > 0 ? `（红包 ${money(o.redpacket_amount)} 记得微信转账）` : ''}</div>` : ''}
+  </div>`;
+}
+
+function statusBadge(st) {
+  const map = { pending: ['等待接单', 'st-pending'], accepted: ['已接单', 'st-accepted'], rejected: ['被打回', 'st-rejected'], done: ['已完成', 'st-done'] };
+  const [label, cls] = map[st];
+  return `<span class="status ${cls}">${label}</span>`;
+}
+
+function renderCartSheet() {
+  const root = document.getElementById('sheetRoot');
+  if (!root) return;
+  if (!ui.cartOpen) { root.innerHTML = ''; return; }
+  const lines = cartLines();
+  const total = cartTotal();
+  root.innerHTML = `
+  <div class="sheet-mask" onclick="closeCart()"></div>
+  <div class="sheet">
+    <div class="sheet-head">确认道歉订单</div>
+    <div class="sheet-body">
+      ${lines.map((l) => `<div class="line-row"><span>${l.emoji} ${esc(l.name)} × ${l.qty}</span><b style="color:#f43f5e">${l.isRedPacket ? money(redVal()) + '（自定）' : money(l.price * l.qty)}</b></div>`).join('')}
+      ${hasRed() ? `
+      <div class="red-box">
+        <div class="red-label">🧧 红包金额（她会看到并去微信领取）</div>
+        <div class="red-presets">
+          ${['5.2', '52', '131.4', '520'].map((v) => `<button class="red-preset ${ui.redAmount === v ? 'on' : ''}" onclick="setRed('${v}')">${money(parseFloat(v))}</button>`).join('')}
+        </div>
+        <input class="red-input" type="number" min="0.01" placeholder="或自定义金额" value="${esc(ui.redAmount)}" oninput="ui.redAmount=this.value;refreshSheet()" />
+      </div>` : ''}
+      <div>
+        <div class="area-label">道歉留言（好好写，她看得到）</div>
+        <textarea class="textarea" rows="3" placeholder="例：宝贝我错了，今晚奶茶加双份珍珠，再附赠捏肩一小时……" oninput="ui.message=this.value">${esc(ui.message)}</textarea>
+      </div>
+      <div class="total-row"><span style="color:#6b7280;font-size:13px">合计诚意</span><span class="total-num">${money(total)}</span></div>
+      <button class="btn-submit" ${total <= 0 ? 'disabled' : ''} onclick="submitOrder()">🛵 立即下单哄人</button>
+    </div>
+  </div>`;
+}
+
+function renderRider() {
+  app.innerHTML = `<div class="rider-page">
+    <div class="rider-emoji">🛵💨</div>
+    <div class="rider-title">骑手已出发，正在哄人路上！</div>
+    <div class="rider-sub">她收到订单后会尽快接单，请随时待命</div>
+    <button class="btn-ghost" onclick="ui.sentAnim=false;render()">返回店铺</button>
+  </div>`;
+}
+
+function renderHer() {
+  const pendings = orders.filter((o) => o.status === 'pending');
+  const earned = orders.filter((o) => o.status === 'accepted' || o.status === 'done').reduce((s, o) => s + o.total, 0);
+  const title = [...STORE.titles].reverse().find((t) => earned >= t.min)?.title || STORE.titles[0].title;
+  const list = ui.filter === 'pending' ? pendings : ui.filter === 'done' ? orders.filter((o) => o.status === 'done') : orders;
+  app.innerHTML = `
+  <button class="role-switch" onclick="switchRole()">切换身份</button>
+  <div class="owner-head">
+    <div class="owner-row">
+      <div><div class="owner-title">👑 ${esc(STORE.herName)}的接单台</div><div class="owner-sub">他下单，你收诚意</div></div>
+      <div><div class="owner-num">${money(earned)}</div><div class="owner-num-label">累计诚意 · ${esc(title)}</div></div>
+    </div>
+    ${pendings.length ? `<div class="pending-tip">🔔 有 ${pendings.length} 笔新订单待处理，快去查收！</div>` : ''}
+  </div>
+  <div class="filter-row">
+    ${[['pending', `待接单${pendings.length ? ' (' + pendings.length + ')' : ''}`], ['all', '全部'], ['done', '已完成']].map(([k, label]) =>
+      `<button class="filter-btn ${ui.filter === k ? 'on' : ''}" onclick="ui.filter='${k}';render()">${label}</button>`).join('')}
+  </div>
+  <div style="padding-top:2px">
+    ${list.length === 0 ? `<div class="empty"><div class="empty-e">${ui.filter === 'pending' ? '😌' : '📭'}</div>${ui.filter === 'pending' ? '他很乖，暂时没有惹你生气' : '还没有订单'}</div>` : list.map(orderCardHer).join('')}
+    ${ui.filter === 'done' && list.length ? `<div style="text-align:center;padding:14px"><button style="color:#fda4af;font-size:12px" onclick="clearDone()">清空已完成记录</button></div>` : ''}
+  </div>`;
+}
+
+function orderCardHer(o) {
+  return `<div class="order-card">
+    <div class="order-top"><span class="order-time">${new Date(o.created_at).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>${statusBadge(o.status)}</div>
+    ${o.items.map((i) => `<div class="order-line"><span>${i.emoji} ${esc(i.name)} × ${i.qty}</span><span style="color:#6b7280">${i.isRedPacket ? '红包 ' + money(o.redpacket_amount) : money(i.price * i.qty)}</span></div>`).join('')}
+    ${o.message ? `<div class="order-msg">💬 “${esc(o.message)}”</div>` : ''}
+    <div class="order-bottom">
+      <span class="order-total">${money(o.total)}</span>
+      <div class="order-actions">
+        ${o.redpacket_amount > 0 && (o.status === 'pending' || o.status === 'accepted') ? `<button class="btn-xs btn-open-red" onclick="openEnvelope('${o.id}')">🧧 拆红包</button>` : ''}
+        ${o.status === 'pending' ? `<button class="btn-xs btn-reject" onclick="openReject('${o.id}')">打回</button><button class="btn-xs btn-accept" onclick="acceptOrder('${o.id}')">接单 💗</button>` : ''}
+        ${o.status === 'accepted' ? `<button class="btn-xs btn-done" onclick="doneOrder('${o.id}')">✓ 已兑现</button>` : ''}
+      </div>
+    </div>
+    ${o.status === 'rejected' ? `<div class="reject-msg">💢 打回原因：${esc(o.reject_reason || '没有诚意，重选！')}</div>` : ''}
+  </div>`;
+}
+
+function renderEnvelope() {
+  const old = document.getElementById('envRoot');
+  if (old) old.remove();
+  if (!ui.envelope) return;
+  const o = ui.envelope;
+  const div = document.createElement('div');
+  div.id = 'envRoot';
+  if (!o.opened) {
+    div.innerHTML = `<div class="env-mask">
+      <button class="env-close" onclick="closeEnvelope()">✕</button>
+      <div class="env-body" onclick="openEnv()">
+        <div class="env-flap"></div>
+        <div class="env-seal">開</div>
+        <div class="env-text">${esc(STORE.hisName)}发来的道歉红包<br/><small>点击拆开</small></div>
+      </div>
+    </div>`;
+  } else {
+    div.innerHTML = `<div class="env-mask" onclick="closeEnvelope()">
+      ${Array.from({ length: 18 }).map((_, i) => `<span class="coin" style="left:${(i * 53) % 100}%;animation-delay:${(i % 6) * 0.12}s;font-size:${18 + (i % 4) * 8}px">🪙</span>`).join('')}
+      <div class="env-result" onclick="event.stopPropagation()">
+        <div class="env-result-label">恭喜获得诚意金</div>
+        <div class="env-amount">${money(o.redpacket_amount)}</div>
+        ${o.message ? `<div class="env-msg">“${esc(o.message)}”</div>` : ''}
+        <div class="env-note">记得去微信收款哦～</div>
+        <button class="env-done" onclick="closeEnvelope()">收下啦</button>
+      </div>
+    </div>`;
+  }
+  document.body.appendChild(div);
+}
+
+function renderRejectDlg() {
+  const old = document.getElementById('rejectRoot');
+  if (old) old.remove();
+  if (!ui.reject) return;
+  const div = document.createElement('div');
+  div.id = 'rejectRoot';
+  div.innerHTML = `<div class="dlg-mask">
+    <div class="dlg" onclick="event.stopPropagation()">
+      <div class="dlg-title">打回这笔订单？</div>
+      <div class="dlg-desc">他会收到打回提醒，需要重新下单（可以暗示他加点诚意）。</div>
+      <textarea class="textarea" rows="3" placeholder="打回原因，如：诚意不够，奶茶要双份！" oninput="ui.rejectReason=this.value">${esc(ui.rejectReason)}</textarea>
+      <div class="dlg-btns">
+        <button class="dlg-btn dlg-cancel" onclick="closeReject()">再想想</button>
+        <button class="dlg-btn dlg-ok" onclick="confirmReject()">确认打回 💢</button>
+      </div>
+    </div>
+  </div>`;
+  div.querySelector('.dlg-mask').addEventListener('click', closeReject);
+  document.body.appendChild(div);
+}
+
+// ==================== 交互 ====================
+window.ui = ui;
+window.pickRole = (r) => { ui.gateRole = r; ui.gatePwd = ''; render(); setTimeout(() => document.getElementById('pwdInput')?.focus(), 50); };
+window.backGate = () => { ui.gateRole = null; render(); };
+window.tryEnter = () => {
+  const ok = ui.gateRole === 'her' ? ui.gatePwd === STORE.herPassword : ui.gatePwd === STORE.hisPassword;
+  if (ok) {
+    role = ui.gateRole;
+    localStorage.setItem('qiai_role', role);
+    ui.gateRole = null; ui.gatePwd = '';
+    render();
+  } else {
+    const box = document.getElementById('gateBox');
+    box.style.animation = 'none'; void box.offsetWidth;
+    box.style.animation = 'shake 0.4s ease-in-out';
+    ui.gatePwd = '';
+    document.getElementById('pwdInput').value = '';
+  }
+};
+window.switchRole = () => { localStorage.removeItem('qiai_role'); role = null; render(); };
+window.addItem = (id) => { cart[id] = (cart[id] || 0) + 1; render(); };
+window.minusItem = (id) => { cart[id] = Math.max(0, (cart[id] || 0) - 1); render(); };
+window.openCart = () => { ui.cartOpen = true; render(); };
+window.closeCart = () => { ui.cartOpen = false; render(); };
+window.setRed = (v) => { ui.redAmount = v; renderCartSheet(); };
+window.refreshSheet = () => {
+  const lines = cartLines();
+  const bar = document.querySelector('.cart-total');
+  if (bar) bar.textContent = money(cartTotal());
+  const rows = document.querySelectorAll('#sheetRoot .line-row b');
+  lines.forEach((l, i) => { if (rows[i]) rows[i].textContent = l.isRedPacket ? money(redVal()) + '（自定）' : money(l.price * l.qty); });
+  const num = document.querySelector('.total-num');
+  if (num) num.textContent = money(cartTotal());
+  const btn = document.querySelector('.btn-submit');
+  if (btn) btn.disabled = cartTotal() <= 0;
+};
+window.submitOrder = async () => {
+  const lines = cartLines();
+  if (!lines.length) return;
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true; btn.textContent = '正在送出…';
+  const order = {
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+    items: lines.map((l) => ({ id: l.id, name: l.name, emoji: l.emoji, price: l.price, qty: l.qty, isRedPacket: !!l.isRedPacket })),
+    total: Math.round(cartTotal() * 100) / 100,
+    message: ui.message.trim(),
+    redpacket_amount: hasRed() ? Math.round(redVal() * 100) / 100 : 0,
+    status: 'pending',
+    reject_reason: '',
+  };
+  const ok = await createOrder(order);
+  if (ok) {
+    cart = {}; ui.cartOpen = false; ui.message = ''; ui.sentAnim = true;
+    toast('订单已送达她的手机！', true);
+    render();
+    setTimeout(() => { ui.sentAnim = false; render(); }, 3200);
+  } else {
+    btn.disabled = false; btn.textContent = '🛵 立即下单哄人';
+    toast('下单失败，请检查网络');
+  }
+};
+window.acceptOrder = async (id) => { await setStatus(id, 'accepted'); toast('已接单，记得让他兑现！', true); };
+window.openReject = (id) => { ui.reject = orders.find((o) => o.id === id); ui.rejectReason = ''; renderRejectDlg(); };
+window.closeReject = () => { ui.reject = null; renderRejectDlg(); };
+window.confirmReject = async () => {
+  await setStatus(ui.reject.id, 'rejected', ui.rejectReason.trim() || '没有诚意，重选！');
+  ui.reject = null; ui.rejectReason = '';
+  renderRejectDlg(); render();
+  toast('已打回，等他重新表现');
+};
+window.doneOrder = async (id) => { await setStatus(id, 'done'); toast('本单已完成', true); };
+window.clearDone = async () => {
+  for (const o of orders.filter((x) => x.status === 'done')) await removeOrder(o.id);
+  toast('已清空');
+};
+window.openEnvelope = (id) => { ui.envelope = { ...orders.find((o) => o.id === id), opened: false }; renderEnvelope(); };
+window.openEnv = () => { ui.envelope.opened = true; renderEnvelope(); };
+window.closeEnvelope = () => { ui.envelope = null; renderEnvelope(); };
+
+// ==================== 启动 ====================
+render();
+loadOrders();
+</script>
+</body>
+</html>
